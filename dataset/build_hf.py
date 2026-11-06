@@ -1,4 +1,5 @@
-"""Writes the Hugging Face mirror (dataset card, parquet and JSONL files, Croissant) from the artifact tree.
+"""Writes the Hugging Face mirror from the artifact tree: the data directory as it is, extra parquet files for the
+configs of the dataset card, the card, the licenses and a Croissant file.
 
     python dataset/build_hf.py --root .. --out ../../verivul_hf
 """
@@ -22,10 +23,8 @@ def main():
     root, out = Path(args.root), Path(args.out)
     here = Path(__file__).resolve().parent
     shutil.rmtree(out, ignore_errors=True)
-    for d in ("data/subsets", "data/evaluation", "licenses"):
-        (out / d).mkdir(parents=True)
-    for rel in ("data/verivul.parquet", "data/verivul_sample.jsonl"):
-        shutil.copy(root / rel, out / rel)
+    shutil.copytree(root / "data", out / "data")
+    (out / "licenses").mkdir()
     for rel, dest in (("data/verivul.jsonl", "data/verivul_full.parquet"), ("data/subsets/pairs.jsonl", "data/subsets/pairs.parquet"),
                       ("data/evaluation/seed_matched_400.jsonl", "data/evaluation/seed_matched_400.parquet"),
                       ("data/evaluation/verified_pairs_98.jsonl", "data/evaluation/verified_pairs_98.parquet")):

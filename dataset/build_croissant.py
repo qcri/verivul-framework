@@ -153,8 +153,7 @@ def main():
             fo["license"] = LICENSES[corpus]
             comparison.append(fo)
     distribution += comparison
-    if not args.hf:
-        distribution.append(file_set("esbmc-logs", "Full ESBMC logs, witnesses and SARIF results, 1,000 programs per gzip-compressed JSONL shard (keyed by id).", "data/logs/*.jsonl.gz", "application/gzip"))
+    distribution.append(file_set("esbmc-logs", "Full ESBMC logs, witnesses and SARIF results, 1,000 programs per gzip-compressed JSONL shard (keyed by id).", "data/logs/*.jsonl.gz", "application/gzip"))
     extras = [
         ("subset-ids", "Id lists: c_cpp, python, strict, env_independent, flagged, vulnerable_exact.", "data/subsets/ids_*.txt", "text/plain"),
         ("model-predictions", "Zero-shot predictions of four LLMs on the evaluation sets and on the comparison corpora, with evaluation reports.", "data/evaluation/**/*.json*", "application/json"),
@@ -163,9 +162,7 @@ def main():
         ("pipeline-statistics", "Stage outcomes and failure modes of the generation run.", "data/pipeline_statistics/*.json", "application/json"),
         ("comparison-corpora", "Samples of the comparison corpora: code for ICVul (MIT), FormAI (MIT) and ARVO (BSD 2-Clause), identifiers and hashes only for TitanVul and Mono.", "data/comparison/**/*", "application/json"),
     ]
-    if args.hf:
-        pass
-    elif args.bundle:
+    if args.bundle:
         archive = file_object(root, base, "data/extras.tar.gz", "application/gzip", "Subsets, predictions, realism, memorisation and pipeline statistics (the directories of the plain tree).")
         distribution.append(archive)
         for sid, d, inc, fmt in extras:
@@ -193,7 +190,7 @@ def main():
     rai = json.load(open(Path(__file__).with_name("rai_fields.json")))
     meta = {
         "@context": CONTEXT, "@type": "sc:Dataset", "name": "VeriVul",
-        "description": rai.pop("description") + (" The full ESBMC logs, the framework and the remaining evaluation material are in the Zenodo record." if args.hf else ""), "conformsTo": "http://mlcommons.org/croissant/1.1",
+        "description": rai.pop("description") + (" The framework is in the Zenodo record and the GitHub repository." if args.hf else ""), "conformsTo": "http://mlcommons.org/croissant/1.1",
         "citeAs": rai.pop("citeAs"), "license": "https://creativecommons.org/licenses/by/4.0/", "url": args.url, "version": "1.0.0",
         "datePublished": "2026-11-05", "keywords": rai.pop("keywords"), "inLanguage": "en", "isLiveDataset": False,
         "creator": [{"@type": "sc:Person", "name": n} for n in ("Ahmed Lekssays", "Hamza Mouhcine", "Issa Khalil")],
