@@ -128,10 +128,8 @@ Data under CC BY 4.0. Seeds derive from ReposVul and ICVul, both MIT. The compar
 @inproceedings{lekssays2026verivul,
   title     = {VeriVul: A Verification-Guided Framework for Generating Realistic Vulnerability Benchmarks},
   author    = {Lekssays, Ahmed and Mouhcine, Hamza and Khalil, Issa},
-  booktitle = {Advances in Neural Information Processing Systems},
-  publisher = {Curran Associates, Inc.},
-  volume    = {39},
+  booktitle = {Advances in Neural Information Processing Systems, Evaluations and Datasets Track},
   year      = {2026},
-  note      = {Evaluations and Datasets Track. Dataset: https://doi.org/10.5281/zenodo.24017330. Code: https://github.com/qcri/verivul-framework}
+  note      = {Dataset DOI: 10.5281/zenodo.24017330, code: https://github.com/qcri/verivul-framework}
 }
 ```
