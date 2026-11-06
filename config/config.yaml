@@ -1,0 +1,145 @@
+# api_base points at any OpenAI-compatible endpoint (vLLM here). Models with enabled: false are skipped.
+models:
+
+  gpt-oss-120b:
+    provider: vllm
+    api_base: http://localhost:8000/v1
+    api_key: EMPTY
+    model_name: gpt-oss
+    enabled: true
+
+  qwen3.8-27b:
+    provider: vllm
+    api_base: http://localhost:8001/v1
+    api_key: EMPTY
+    model_name: Qwen/Qwen3.8-27B
+    max_concurrent_requests: 32   # the server queues anything above its KV-cache capacity
+    # Sent to vLLM with every request.  Qwen3 reasons before answering by default; that is
+    # thousands of extra tokens per snippet, so thinking is switched off.
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: false
+    enabled: true
+
+  gemma-4-31b-it:
+    provider: vllm
+    api_base: http://localhost:8002/v1
+    api_key: EMPTY
+    model_name: google/gemma-4-31B-it
+    enabled: true
+
+
+sampling_params:
+  temperature: 0.1
+  max_tokens: 16256
+  top_p: 0.95
+
+rabbitmq:
+  host: localhost
+  port: 54331
+
+database:
+  url: null # sqlite:///verivul.db -- If you want to use SQLite, uncomment this line otheriwise use PostgreSQL through env variable
+  # The pool must cover every worker thread that can want a connection at once,
+  # i.e. at least the largest *_concurrency below.  A smaller pool shows up as
+  # "QueuePool limit of size N overflow M reached, connection timed out", which
+  # agents then record as a compilation/verification failure on a snippet that
+  # was never actually processed.  pgbouncer fronts Postgres in transaction mode
+  # (DEFAULT_POOL_SIZE 100), so client-side connections are cheap.
+  pool_size: 16
+  max_overflow: 8
+  pool_timeout: 30
+
+esbmc:
+  image: esbmc:8.4
+  # Wall-clock budget per snippet, in seconds; ESBMC is given 10s less (esbmc_budget).
+  # argv-reading programs are rejected before verification, so stdin-driven programs
+  # verify in seconds; a snippet that runs out of budget is recorded UNKNOWN.
+  timeout: 600
+  # After each C/C++ verdict, search for an input that makes a sanitizer fire and store
+  # the outcome in verification_meta['confirmation'] (shown in the UI).  Best-effort: it
+  # never changes the ESBMC verdict.  confirm_budget is seconds of search per program.
+  dynamic_confirm: true
+  # After a program compiles, run ESBMC's front end over it (about a second).  A program the
+  # verifier cannot read is sent back to the LLM with ESBMC's error instead of taking a
+  # verification slot to fail (C++ library features ESBMC lacks, unsupported Python imports).
+  frontend_check: true
+  # Seconds for programs derived from a verified parent (the fix / injection child).  Most
+  # rejected children had run out of the normal budget, leaving no verdict to pair with.
+  derived_timeout: 1800
+  confirm_budget: 40
+  # A VULNERABLE program the search cannot crash goes to its generating model for a crashing
+  # input (poc_rounds attempts); still nothing and the label is NOT_REPRODUCED: an original
+  # program is regenerated (max_regenerations), an injected one is rejected and re-paired.
+  poc_rounds: 2
+  max_regenerations: 2
+
+queues:
+  durable: true
+  retry_ttl: 5000
+  max_retries: 3
+  prefetch_count: 32
+  llm_batch_size: 16
+  llm_batch_timeout: 2.0
+  llm_concurrency: 16
+  # A batch is acked only when every message in it is done, and an ESBMC run takes up to
+  # esbmc.timeout (300 s).  RabbitMQ closes a channel whose delivery stays unacked for 30
+  # minutes (consumer_timeout), which a batch of 16 sequential runs always exceeded: the
+  # esbmc queues had delivered thousands of messages and acked none, so the same snippets
+  # were verified again and again.  One message per batch acks each verdict as it lands.
+  # esbmc_concurrency is the number of messages held per model (verification_slots is the
+  # number actually running): 12 x 3 models = 36 held for 32 slots, so a message rarely waits for a slot.
+  esbmc_batch_size: 1
+  esbmc_batch_timeout: 1
+  esbmc_concurrency: 12
+  compiler_batch_size: 16
+  compiler_batch_timeout: 60
+  compiler_concurrency: 16
+  # When false, agents update DB status but never push to the next stage's queue.
+  # Use --resume --stages <stage> to advance manually between stages.
+  auto_advance: true
+  # On SIGTERM, how long a consumer waits for in-flight callbacks to finish before
+  # the process exits.  Keep it under main.py's SHUTDOWN_GRACE_SECONDS (30) so the
+  # drain completes before the parent escalates to SIGKILL.  Messages that are not
+  # settled in time stay unacked and are re-delivered, so nothing is lost.
+  shutdown_drain_seconds: 25
+
+docker_images:
+  c: gcc:latest
+  cpp: gcc:latest
+  kotlin: esbmc:8.4   # eclipse-temurin lacks kotlinc; esbmc image has it
+  python: python:3.12-slim
+  solidity: esbmc:8.4   # ethereum/solc:stable has no shell; esbmc image has solc + bash
+  cuda: nvidia/cuda:12.3.2-devel-ubuntu22.04
+
+resource_management:
+  compilation_slots: 16
+  verification_slots: 32    # ESBMC is single-threaded: one core per slot (esbmc_cpu_limit)
+  compiler_cpu_limit: 1     # CPUs per compiler container  (0 = unlimited)
+  esbmc_cpu_limit: 1        # CPUs per ESBMC container     (0 = unlimited)
+  compiler_mem_limit: "512m"
+  # Backing argv with nondet strings (--argv-max-args / --argv-max-strlen) grows
+  # the SMT formula, and at 2048m some argv-reading programs died with
+  # "ERROR: Out of memory" rather than timing out, which loses a datapoint the
+  # same way a timeout does.  ESBMC is given this same value via esbmc_budget, so
+  # it reports running out of memory instead of being OOM-killed by Docker.
+  # Note this is per container and verification_slots containers can run at once,
+  # so the peak is esbmc_mem_limit * verification_slots.
+  esbmc_mem_limit: "8192m"
+
+# Never generate these: Kotlin snippets cannot be verified (Jimple conversion fails on real
+# programs; 0/40 verified in testing).  Java seeds are remapped to Kotlin, so they are skipped too.
+skip_languages: [kotlin]
+
+pairing:
+  max_attempts: 3   # counterpart attempts per verified program
+  # Model that writes vulnerability fixes for every generator's programs (empty: the generating
+  # model).  On 10 confirmed programs it removed the crash in 9 (gpt-oss 7, qwen 3).
+  fix_model: gemma-4-31b-it
+
+guards:             # static rejections before compilation, see src/utils/program_guards.py
+  reject_argv: true
+  reject_intrinsics: true
+  reject_threads: true
+  reject_non_stdin_input: true   # stdin only: the sanitizer search must be able to reach the defect
+  reject_leakage: true

@@ -1,0 +1,34 @@
+Task: The bounded model checker ESBMC reports that the C/C++ program below violates a memory-safety
+or undefined-behaviour property, and gives a counterexample: concrete values on a path that reaches
+the violation. Write the concrete input that makes the compiled program reach that violation when it
+runs under AddressSanitizer, UndefinedBehaviorSanitizer and LeakSanitizer.
+
+How the input is delivered:
+- The input bytes are the program's data source: they are sent on stdin, and they are also written to
+  every file the program opens. If the program reads a file NAME (from stdin or an environment
+  variable) and then opens it, the harness sends a path to a file holding your input instead, so
+  always write the CONTENT the program parses, never a file name.
+- Environment variables the program reads receive the same input.
+- There are no command-line arguments.
+
+How to build the input:
+- Follow the program's parsing exactly: magic numbers, byte order, field widths, version checks,
+  keywords, line formats, length fields and checksums must all pass so execution reaches the defect.
+- Use the counterexample values as a guide, but they come from a model in which malloc never fails.
+  The real allocator refuses requests above 512 MB, so prefer sizes that trigger the defect while
+  keeping every allocation small (for example a 32-bit length of 0x10001 that truncates to 1 in 16 bits,
+  rather than 0xFFFF000F).
+- A leak or crash only counts if the program actually reaches it: make sure earlier checks pass and
+  that the input ends where the program expects (EOF, newline, short read) to take the faulty path.
+
+Output: a JSON object inside <poc> tags, with up to three alternative candidate inputs:
+<poc>
+{"candidates": [
+  [{"text": "OPEN 0 1 5\n"}, {"text": "READ 0 4\n"}],
+  [{"hex": "47424b4d"}, {"u32le": 1}, {"u32be": 65537}, {"u16le": 7}, {"u8": 255}, {"repeat": {"hex": "41", "count": 65537}}]
+]}
+</poc>
+Each candidate is a list of chunks concatenated in order. Chunk kinds: "text" (string, JSON escapes
+allowed), "hex" (bytes as hex), "u8", "u16le", "u16be", "u32le", "u32be", "u64le", "u64be", "i32le",
+"i32be" (integers), "repeat" ({"hex": ..., "count": N} or {"text": ..., "count": N}).
+Write nothing outside the <poc> tags.

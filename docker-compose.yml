@@ -1,0 +1,83 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    container_name: verivul-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-myuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-verivul}
+      POSTGRES_INITDB_ARGS: --auth-host=md5
+    # Sized for every agent process: 4 models x (llm + compiler + esbmc) workers.
+    # pgbouncer caps real server connections at MAX_DB_CONNECTIONS, so this only
+    # needs headroom above that for admin/backup/web sessions.
+    command: >
+      postgres
+      -c max_connections=300
+      -c shared_buffers=512MB
+      -c idle_in_transaction_session_timeout=300000
+    shm_size: 1gb
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "54329:5432"
+    networks:
+      - verivul_network
+
+  pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    container_name: verivul-pgbouncer
+    depends_on:
+      - db
+    environment:
+      DATABASES_HOST: db
+      DATABASES_PORT: 5432
+      DATABASES_USER: ${POSTGRES_USER:-myuser}
+      DATABASES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      DATABASES_DBNAME: ${POSTGRES_DB:-verivul}
+      # NOTE: this image only reads pgbouncer settings prefixed PGBOUNCER_ (and
+      # DATABASES_* for the backend).  Unprefixed names are silently ignored, which
+      # is how the pool used to run on defaults (session mode, 100 clients, pool 20).
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 10000
+      # Transaction pooling: a server connection lives for one transaction, so
+      # ~100 serve thousands of clients.  Keep well below Postgres max_connections.
+      PGBOUNCER_DEFAULT_POOL_SIZE: 100
+      PGBOUNCER_MAX_DB_CONNECTIONS: 150
+      PGBOUNCER_RESERVE_POOL_SIZE: 20
+      PGBOUNCER_RESERVE_POOL_TIMEOUT: 3
+      # Queue for a server connection instead of failing after the 120s default.
+      PGBOUNCER_QUERY_WAIT_TIMEOUT: 600
+      PGBOUNCER_SERVER_IDLE_TIMEOUT: 600
+      PGBOUNCER_CLIENT_IDLE_TIMEOUT: 0
+      PGBOUNCER_LISTEN_PORT: 6432
+      PGBOUNCER_LISTEN_ADDR: 0.0.0.0
+    ports:
+      - "54330:6432"
+    restart: always
+    networks:
+      - verivul_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: verivul-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+      # Default is 30 min.  A delivery that stays unacked longer makes the broker close the
+      # channel and re-deliver everything on it; 4 h leaves room for slow LLM / ESBMC batches.
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit consumer_timeout 14400000
+    restart: always
+    ports:
+      - "54331:5672"
+      - "54332:15672"
+    networks:
+      - verivul_network
+
+volumes:
+  pgdata:
+
+networks:
+  verivul_network:
+    driver: bridge

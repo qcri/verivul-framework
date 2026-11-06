@@ -1,0 +1,631 @@
+
+* * * =========================== ESBMC 8.4.0 ============================ * * *
+
+Main Usage:
+  --input-file file.c ...               Source file names
+
+Options:
+  -? [ --help ]                         Show help
+  --function name                       Set main function name
+  --class cname                         Set the class/namespace name where the 
+                                        function is inside
+  --claim nr                            Only check specific claims
+  --instruction nr                      Limit the number of instructions 
+                                        executed during symbolic execution
+  --git-hash                            Show ESBMC version with git hash and 
+                                        exit
+  --version                             Show current ESBMC version and exit
+  --verbosity arg                       Verbosity of log output, can be given 
+                                        multiple times. Parameter is either a 
+                                        decimal N or 'module:N' to set the 
+                                        log-level of debug messages of the 
+                                        module to N; without module, it sets 
+                                        the global log-level
+
+Printing options:
+  --symbol-table-only                   Only show symbol table
+  --symbol-table-too                    Show symbol table and verify
+  --parse-tree-only                     Only show parse tree
+  --parse-tree-too                      Show parse tree and verify
+  --goto-functions-only                 Only show goto program
+  --goto-functions-too                  Show goto program and verify
+  --dump-goto-cfg                       Create a file for each function with 
+                                        the associated CFG in DOT format
+  --show-call-sites                     Show each function call site with its 
+                                        arguments
+  --program-only                        Only show program expression
+  --program-too                         Show program expression and verify
+  --ssa-symbol-table                    Show symbol table along with SSA
+  --ssa-guards                          Print guard expressions in SSA output
+  --ssa-sliced                          Print the sliced SSAs
+  --ssa-no-location                     Omit location info from SSA output
+  --smt-formula-only                    Only show SMT formula (not supported by
+                                        all solvers)
+  --smt-formula-too                     Show SMT formula (not supported by all 
+                                        solvers), and verify
+  --smt-model                           Show SMT model (not supported by all 
+                                        solvers), if the formula is SAT
+  --color auto|always|never (=auto)     Show colored output
+  --log-message                         Print LOG message including file, line,
+                                        and timestamp
+  --keep-alive-interval interval        Set interval (in seconds) for keep 
+                                        alive messages (default: 60)
+  --enable-keep-alive                   Enable keep alive messages during long 
+                                        solving processes
+
+Trace:
+  --quiet                               Do not print unwinding information 
+                                        during symbolic execution
+  --compact-trace                       Enable --no-slice and hide internal 
+                                        symbols from the trace
+  --symex-trace                         Print instructions during symbolic 
+                                        execution
+  --ssa-trace                           Print SSA during SMT encoding
+  --ssa-smt-trace                       Print generated SMT during SMT encoding
+  --ssa-features-dump                   Print features in the SSA (just before 
+                                        conversion)
+  --symex-ssa-trace                     Print generated SSA during symbolic 
+                                        execution
+  --show-goto-value-sets                Show value-set analysis for the goto 
+                                        functions
+  --show-symex-value-sets               Show value-set analysis during symbolic
+                                        execution
+  --show-stacktrace                     Show the stack trace of function call 
+                                        in the counterexample
+  --simplify-trace                      Simplify the trace and exclude the 
+                                        assignments whose variables are not 
+                                        from user-input files
+
+Python frontend:
+  --python path                         Python interpreter binary to use 
+                                        (searched in $PATH; default: python)
+  --override-return-annotation          Override return annotation with 
+                                        inferred type
+  --strict-types                        Enforce strict type checking for 
+                                        function arguments during verification
+  --python-no-fold                      Disable NumPy constant folding in the 
+                                        Python frontend
+  --nondet-str-length nr (=16)          Set maximum length for 
+                                        non-deterministic strings (default is 
+                                        16)
+  --python-list-compare-depth nr (=4)   Set maximum nesting depth for Python 
+                                        list comparison (default is 4)
+  --python-irep2-adjust                 Run the IREP2-native Python adjuster 
+                                        alongside the legacy adjust pass (V.4 
+                                        migration; experimental, default off)
+
+Solidity frontend:
+  --sol path                            Solidity source file (.sol) — also 
+                                        accepted as a positional argument
+  --solc-bin path                       path to solc binary (default: $SOLC or 
+                                        solc in $PATH)
+  --contract cname                      Set contract name
+  --focus-function name                 Restrict the contract harness to verify
+                                        only the named public/external 
+                                        function. The constructor and state 
+                                        initialization still run (unlike 
+                                        --function), but the nondet dispatch 
+                                        loop calls only this function. Requires
+                                        --contract when the source declares 
+                                        more than one contract.
+  --no-visibility                       Force to verify every function, even if
+                                        it's an unreachable internal/private 
+                                        function
+  --unbound                             Model external function calls as 
+                                        arbitrary behavior
+  --bound                               Model inter-contract function calls 
+                                        within a bounded system (default)
+  --reentry-check                       Detect reentrancy behavior during 
+                                        contract execution
+  --negating-property fname             Convert the assert(cond) to 
+                                        assert(!cond)
+
+Frontend:
+  -I [ --include ] path                 Set include path
+  --include-file file                   Include files via frontend's -include 
+                                        option before anything else
+  --nostdinc                            Do not include from standard system 
+                                        paths
+  --idirafter path                      Append system include path to search 
+                                        after system headers
+  -D [ --define ] macro                 Define preprocessor macro
+  -W [ --warning ] arg                  Enable specific frontend warnings, 
+                                        disable with "no-" prefix, or pass 
+                                        options directly to the C/C++ frontends
+                                        with the form -Wc,OPT1,OPT2,...
+  --std version                         Set C/C++ standard version
+  --sysroot <path>                      Set the sysroot for the frontend
+  --no-abstracted-cpp-includes          Do not include abstract C++ operational
+                                        models
+  -f [ --force ] arg                    Pass -f flags to the C/C++ frontend
+  --preprocess                          Stop after preprocessing
+  --no-inlining                         Disable inlining function calls
+  --full-inlining                       Perform full inlining of function calls
+  --all-claims                          Keep all claims
+  --keep-verified-claims                Do not skip verified claims in 
+                                        multi-property verification
+  --show-loops                          Show the loops in the program
+  --show-claims                         Only show claims
+  --show-vcc                            Show the verification conditions
+  --no-library                          Disable built-in abstract C library
+  --no-string-literal                   Ignore string literals (replace with 
+                                        NULL)
+  --binary                              Read goto program instead of source 
+                                        code
+  --cprover                             Deprecated no-op (kept for backward 
+                                        compatibility)
+  --no-cprover-additions                Do not auto-link ESBMC additions when 
+                                        reading a CBMC goto-binary
+  --dont-care-about-missing-extensions  Don't crash on unsupported extensions
+  --old-frontend                        Parse source files using the old 
+                                        frontend (deprecated)
+  --funsigned-char                      Make "char" unsigned by default
+  --fms-extensions                      Enable microsoft C extensions
+  --argv-max-args nr (=2)               Maximum number of argv entries backed 
+                                        with nondet strings (default 2). Higher
+                                        values widen coverage at the cost of a 
+                                        larger SMT formula.
+  --argv-max-strlen nr (=256)           Maximum length (in bytes, including the
+                                        null terminator) of each backed argv 
+                                        string (default 256).
+  --gcc-nested-functions                Enable GCC nested functions extension 
+                                        (source-level lambda lifting)
+  --sv-comp                             Enable SV-COMP mode: suppress 
+                                        GCC-acceptable frontend diagnostics 
+                                        (int/pointer conversions), treat 
+                                        __builtin_unreachable as a no-op, emit 
+                                        physical line numbers for witnesses, 
+                                        and avoid malloc/free in the 
+                                        fopen/fclose models. Set automatically 
+                                        by the SV-COMP wrapper.
+
+Architecture:
+  --no-arch                             Don't set up an architecture
+  --little-endian                       Allow little-endian word-byte 
+                                        conversions
+  --big-endian                          Allow big-endian word-byte conversions
+  --16                                  Set width of machine word (default is 
+                                        64)
+  --32                                  Set width of machine word (default is 
+                                        64)
+  --64                                  Set width of machine word (default is 
+                                        64)
+  --cheri mode                          Enable CHERI-C in 'hybrid' or 'purecap'
+                                        mode (default is off)
+  --cheri-uncompressed                  Use full CHERI capabilities instead of 
+                                        the compressed format
+  --i386-macos                          Set MACOS/I386 architecture
+  --ppc-macos                           Set PPC/I386 architecture
+  --i386-linux                          Set Linux/I386 architecture (default)
+  --i386-win32                          Set Windows/I386 architecture
+
+Witness:
+  --witness-output path                 Generate the verification result 
+                                        witness in both Yaml and GraphML format
+  --sarif-output { path | - }           Generate a SARIF 2.1.0 report of the 
+                                        violation; use '-' for stdout. Each 
+                                        result is annotated with the matching 
+                                        CWE ids (CWE 4.20).
+  --witness-output-graphml { path | - } Generate the verification result 
+                                        witness in GraphML format; use '-' for 
+                                        output to stdout
+  --witness-output-yaml { path | - }    Generate the verification result 
+                                        witness in Yaml format; use '-' for 
+                                        output to stdout
+  --witness-producer arg                Override the producer name in witness 
+                                        files
+  --witness-programfile arg             Override the program file name in 
+                                        witness files
+  --validate-correctness-witness        Validate the YAML correctness witness 
+                                        (2.0)
+  --validate-violation-witness          Validate the YAML violation witness 
+                                        (2.0)
+  --witness <path>                      Set the witness path
+  --all-witnesses                       After a property fails, enumerate 
+                                        further input vectors that also violate
+                                        it (until UNSAT or --max-witnesses is 
+                                        reached). Implies --multi-property.
+  --max-witnesses n (=16)               Cap the number of witnesses reported 
+                                        per property (default: 16; 0 = 
+                                        unlimited). Only meaningful with 
+                                        --all-witnesses.
+
+Output:
+  --output-goto arg                     Export generated goto program
+  --cex-output arg                      Save the counterexample into a file or,
+                                        in multi-property mode, multiple files 
+                                        with name prefix 'N-' where 'N' is a 
+                                        decimal increasing from zero
+  --file-output arg                     Redirect all output to a file (no 
+                                        stdout/stderr)
+  --goto2c                              Translate the GOTO program to C
+  --generate-testcase                   If a solution is found, generates a 
+                                        testcase in XML
+  --generate-pytest-testcase            If a solution is found, generates a 
+                                        pytest testcase for Python programs
+  --generate-ctest-testcase             If a solution is found, generates CTest
+                                        testcases for C programs
+  --generate-html-report                If a violation is found, generates a 
+                                        HTML report
+  --generate-json-report                If a violation is found, generates a 
+                                        JSON report
+  --result-only                         Do not print the counter-example
+
+Function Contracts:
+  --enforce-contract fun                Wrap function to check its contract 
+                                        (use "*" for all functions)
+  --replace-call-with-contract fun      Replace function calls with contract 
+                                        semantics (use "*" for all functions)
+  --enforce-all-contracts               Enforce contracts for all functions 
+                                        marked with __ESBMC_contract
+  --replace-all-contracts               Replace calls to all functions marked 
+                                        with __ESBMC_contract
+
+BMC:
+  --unwind nr                           Unwind nr times
+  --unwindset L:nr,...                  Unwind loop L with nr times (use 
+                                        --show-loops to get the loops info)
+  --unwindsetname name:idx:nr,...       Unwind loop idx (0-indexed) in function
+                                        name with nr times.
+                                        Syntax: func, N@ns@func, 
+                                        S@Class@method, file.c@func,
+                                                N@ns@S@Class@method, 
+                                        file.c@N@ns@S@Class@method
+                                        Also accepts Clang USR format (e.g., 
+                                        c:@F@func# or c:file.c@F@func#)
+                                        Example: --unwindsetname 
+                                        compute:0:10,N@math@sum:1:5
+                                        Use --show-loops to see available 
+                                        functions and loop indices
+  --no-unwinding-assertions             Do not generate unwinding assertions
+  --no-remove-unreachable               Disable the removal of unreachable code
+                                        in GOTO programs
+  --no-remove-no-op                     Disable the removal of NO-OP 
+                                        instructions in GOTO programs
+  --partial-loops                       Permit paths with partial loops
+  --no-slice                            Do not remove unused equations
+  --multi-fail-fast n                   Stop after first n VCC violations in 
+                                        multi-property mode
+  --no-slice-name name                  Disable slicing for all symbols 
+                                        generated with the given name
+  --no-slice-id id                      Disable slicing for the symbol with the
+                                        given id
+  --goto-unwind                         Unroll bounded loops at goto level
+  --unlimited-goto-unwind               Do not unroll bounded loops at goto 
+                                        level (need to enable --goto-unwind)
+  --slice-assumes                       Remove unused assume statements
+  --skip-bmc                            Do not perform bounded model checking
+  --no-cache-asserts                    Do not cache asserts that were already 
+                                        proven correct
+
+Incremental BMC:
+  --incremental-bmc                     Incremental loop unwinding verification
+  --falsification                       Incremental loop unwinding for bug 
+                                        searching
+  --termination                         Incremental loop unwinding assertion 
+                                        verification
+
+k-induction:
+  --base-case                           Check the base case
+  --forward-condition                   Check the forward condition
+  --inductive-step                      Check the inductive step
+  --k-induction                         Prove by k-induction
+  --goto-contractor                     Enable contractor-based interval 
+                                        refinements on goto level on asserts
+  --goto-contractor-condition           Enable contractor-based interval 
+                                        refinements on goto level on conditions
+  --k-induction-parallel                Prove by k-induction, running each step
+                                        on a separate process
+  --k-step nr (=1)                      Set k increment (default is 1)
+  --max-k-step nr (=50)                 Set max number of iteration (default is
+                                        50)
+  --base-k-step nr (=1)                 Start the base case from n step 
+                                        (default is 1)
+  --show-cex                            Print the counter-example produced by 
+                                        the inductive step
+  --cex-only                            Do not print the state trace
+  --bidirectional                       Search the inductive step 
+                                        counterexample for assignments
+  --unlimited-k-steps                   Set max number of iteration to UINT_MAX
+  --max-inductive-step nr (=-1)         Set max k value for the inductive step
+  --loop-invariant                      Verify using loop invariant + 
+                                        k-induction (combined mode)
+  --loop-invariant-check                Verify using loop invariant inductive 
+                                        check (standalone mode)
+  --loop-frame-rule                     Enable frame rule for loop invariant 
+                                        checking (snapshot-havoc-assume 
+                                        pattern, requires --loop-invariant-chec
+                                        k)
+  --check-vacuity                       After UNSAT discharge, re-solve path 
+                                        assumptions alone; if also UNSAT, 
+                                        report VERIFICATION UNKNOWN (vacuous 
+                                        discharge) instead of SUCCESSFUL. 
+                                        Default on when --loop-invariant or 
+                                        --loop-invariant-check is set.
+  --no-vacuity-check                    Disable the vacuity probe (overrides 
+                                        default-on behavior).
+
+Concurrency and Scheduling:
+  --schedule                            Use schedule recording approach
+  --context-bound nr (=-1)              Limit number of context switches for 
+                                        each thread
+  --state-hashing                       Enable state-hashing, prunes duplicate 
+                                        states
+  --no-goto-merge                       Do not merge gotos when restoring paths
+                                        after a context-switch
+  --no-por                              Do not do partial order reduction
+  --cswitch-skip-readonly-globals       Skip context switches on globals that 
+                                        are never written anywhere in the 
+                                        program (off by default)
+  --all-runs                            Check all interleavings, even if a bug 
+                                        was already found
+
+Solver:
+  --list-solvers                        List available solvers and exit
+  --boolector                           Use Boolector
+  --z3                                  Use Z3
+  --z3-debug                            Extracts Z3 dump and SMT2 formula
+  --z3-debug-dump-file z3.log           Name for Z3 dump file
+  --z3-debug-smt-file log.smt2          Name for Z3 smt2 file
+  --mathsat                             Use MathSAT
+  --cvc                                 Alias for --cvc4; this may change in 
+                                        the future to --cvc5
+  --cvc4                                Use CVC4
+  --cvc5                                Use CVC5
+  --yices                               Use Yices
+  --bitwuzla                            Use Bitwuzla (default)
+  --bv                                  Use solver with bit-vector arithmetic
+  --ir                                  Use solver with integer/real 
+                                        arithmetic. Integer/real have an 
+                                        unbounded range, overapproximating 
+                                        normal integers/reals while 
+                                        significantly boosting performance
+  --ir-ieee                             Use integer/real arithmetic with 
+                                        real-arithmetic enclosure constraints 
+                                        for floating-point operations
+  --parallel-solving                    Solve each VCC in parallel (this 
+                                        activates --multi-property)
+  --smtlib                              Use SMT lib format
+  --default-solver <solver>             Override default solver used if no 
+                                        concrete one is specified
+  --non-supported-models-as-zero        If ESBMC can't extract a 
+                                        type/expression from the solver, then 
+                                        the value will be set to zero
+  --smtlib-solver-prog arg              Path to the SMT-LIB solver executable
+  --output <filename>                   Output VCCs in SMT lib format to given 
+                                        file (or stdout if it is '-')
+  --floatbv                             Encode floating-point using the SMT 
+                                        floating-point theory (default)
+  --fixedbv                             Encode floating-point as fixed 
+                                        bit-vectors
+  --fp2bv                               Encode floating-point as bit-vectors 
+                                        (default for solvers that don't support
+                                        the SMT floating-point theory)
+  --tuple-node-flattener                Encode tuples using our tuple to node 
+                                        API
+  --tuple-sym-flattener                 Encode tuples using our tuple to symbol
+                                        API
+  --array-flattener                     Encode arrays using our array API
+  --no-return-value-opt                 Disable return value optimization to 
+                                        compute the stack size
+
+Incremental SMT:
+  --smt-during-symex                    Enable incremental SMT solving
+  --smt-thread-guard                    Check the thread guard during thread 
+                                        exploration
+  --smt-symex-guard                     Check conditional goto statements 
+                                        during symbolic execution
+  --smt-symex-assert                    Check assertion statements during 
+                                        symbolic execution
+  --smt-symex-assume                    Check assume statements during symbolic
+                                        execution
+
+Property checking:
+  --multi-property                      Verify satisfiability of all claims of 
+                                        the current bound
+  --no-standard-checks                  Disable default checks
+  --no-assertions                       Ignore assertions
+  --no-bounds-check                     Do not do array bounds check
+  --no-div-by-zero-check                Do not do division by zero check
+  --no-pointer-check                    Do not do pointer check
+  --no-align-check                      Do not check pointer alignment
+  --no-unlimited-scanf-check            Do not do overflow check for 
+                                        scanf/fscanf with unlimited character 
+                                        width
+  --no-vla-size-check                   Do not check whether the size of VLAs 
+                                        overflows the available address space
+  --no-abnormal-memory-leak             Affects --memory-leak-check; if both 
+                                        are enabled, the check for memory leaks
+                                        is only performed for normal 
+                                        termination, that is, not for abort()
+  --no-reachable-memory-leak            Exclude still reachable objects from 
+                                        --memory-leak-check
+  --printf-check                        Enable pointer validation for printf 
+                                        arguments
+  --nan-check                           Check floating-point for NaN
+  --is-instance-check                   Enable runtime isinstance assertions 
+                                        for annotated code
+  --memory-leak-check                   Enable memory leak check
+  --overflow-check                      Enable arithmetic over- and underflow 
+                                        check
+  --unsigned-overflow-check             Enable arithmetic over- and underflow 
+                                        check for unsigned integers
+  --ub-shift-check                      Enable undefined behavior check on 
+                                        shift operations
+  --clz-zero-check                      Enable undefined behavior check on 
+                                        __builtin_clz of a zero argument
+  --struct-fields-check                 Enable over-sized read checks for 
+                                        struct fields
+  --deadlock-check                      Enable global and local deadlock check 
+                                        with mutex
+  --data-races-check                    Enable data races check
+  --data-races-check-only               Enable data races check and only focus 
+                                        on race checks to reduce thread 
+                                        interleaving
+  --lock-order-check                    Enable for lock acquisition ordering 
+                                        check
+  --atomicity-check                     Enable atomicity check at visible 
+                                        assignments
+  --uninitialised-vars-check            Enable check for reads of uninitialised
+                                        local variables (CWE-457)
+  --unchecked-return-value-check        Enable check for unchecked return 
+                                        values of fallible calls (CWE-252)
+  --volatile-check                      Enable check for volatile variable
+  --stack-limit bits (=-1)              Check if stack limit is respected
+  --error-label label                   Check if label is unreachable
+  --force-malloc-success                Do not check for malloc/new failure
+  --force-realloc-success               Do not check for realloc failure
+  --malloc-zero-is-null                 Force malloc(0) to return NULL
+  --max-symbolic-realloc-copy nr (=128) Set maximum number of elements to copy 
+                                        symbolically in realloc (default is 
+                                        128)
+  --enable-unreachability-intrinsic     Enable unreach-call style checking: 
+                                        activates __ESBMC_unreachable() and 
+                                        treats reach_error()/__VERIFIER_error()
+                                        as error sentinels
+  --conv-assert-to-assume               Convert assertions for bounds and 
+                                        pointer checks into assumptions
+  --unknown-method-args-check           Check pointer type arguments passed to 
+                                        the unknown function call
+
+Interval Analysis:
+  --interval-analysis                   Enable interval analysis for integer 
+                                        and float variables and add assumes to 
+                                        the program
+  --interval-analysis-dump              Dump resulting intervals for the 
+                                        analysis
+  --interval-analysis-csv-dump arg      Dump resulting intervals for the 
+                                        analysis in a csv file
+  --interval-analysis-wrapped           Enable analysis using wrapped intervals
+                                        (disables Integers)
+  --interval-analysis-arithmetic        Enable interval arithmetic for integer 
+                                        variables (Integers and Wrapped)
+  --interval-analysis-bitwise           Enable interval bitwise for integer 
+                                        variables (Integers and Wrapped)
+  --interval-analysis-modular           Enable modular arithmetic for integer 
+                                        variables (Integers and Wrapped)
+  --interval-analysis-simplify          Enable assertion simplification during 
+                                        interval analysis (all)
+  --interval-analysis-no-contract       Disable use of contractors in abstract 
+                                        states (Integers, Reals)
+  --interval-analysis-assume-asserts    Propagate assertions as invariants 
+                                        during interval analysis (Integers, 
+                                        Reals)
+  --interval-analysis-eval-assumptions  Evaluate assumptions and guards as 
+                                        boolean operators to accelerate 
+                                        convergence (Integers, Reals)
+  --interval-analysis-ibex-contractor   Enable use of ibex contractors
+  --interval-analysis-extrapolate       Enable extrapolation in abstract states
+                                        (all)
+  --interval-analysis-extrapolate-limit nr (=1)
+                                        Set limit for reaching a fixpoint 
+                                        (default is 1)
+  --interval-analysis-extrapolate-under-approximate 
+                                        Assume integers will not overflow 
+                                        (Integers)
+  --interval-analysis-narrowing         Enable narrowing in abstract states 
+                                        (Integers and Reals)
+  --no-interval-symex-guard             Disable interval-based guard pruning 
+                                        during symbolic execution (enabled by 
+                                        default)
+  --interval-symex-assert               Use interval-based assertion pruning 
+                                        during symbolic execution to skip 
+                                        assertions that are provably true under
+                                        the tracked intervals
+
+Coverage options:
+  --assertion-coverage                  Show the coverage of assertion 
+                                        statements
+  --assertion-coverage-claims           Enable assertion-coverage and show all 
+                                        claims, both reached and unreached
+  --condition-coverage                  This activates --multi-property, 
+                                        deactivates --keep-verified-claims, and
+                                        shows the coverage of condition 
+                                        statements
+  --condition-coverage-claims           Enable condition-coverage and shows the
+                                        instrumented claims
+  --condition-coverage-rm               Use '--condition-coverage' while 
+                                        disable '--no-remove-unreachable'
+  --condition-coverage-claims-rm        Use '--condition-coverage-claims' while
+                                        disable '--no-remove-unreachable'
+  --no-cov-asserts                      Do not count the guard in the 
+                                        assertions
+  --cov-assume-asserts                  Convert assertions to assumptions in 
+                                        coverage mode to preserve path 
+                                        constraints
+  --branch-coverage                     Show the coverage of branches
+  --branch-coverage-claims              Enable branch-coverage and shows all 
+                                        reached claims
+  --branch-function-coverage            Show the coverage of branches and 
+                                        function entry
+  --branch-function-coverage-claims     Enable branch-coverage-ext and shows 
+                                        all reached claims
+  --k-path-coverage [=N(=-2147483648)]  Show the coverage of k-path witnesses 
+                                        (PathCrawler-style; Williams et al., 
+                                        EDCC 2005). N is the prefix depth 
+                                        (1..30); if omitted, tied to --unwind, 
+                                        falling back to 4 when --unwind is 
+                                        unset
+  --k-path-coverage-claims              Enable --k-path-coverage with default N
+                                        (use --k-path-coverage=N directly to 
+                                        override) and show all reached claims
+  --k-path-witness-depth D (=8)         Cap on post-simplification witness 
+                                        expression depth in --k-path-coverage; 
+                                        deeper witnesses are dropped (default 
+                                        8)
+  --k-path-max-goals M (=10000)         Per-function goal cap for 
+                                        --k-path-coverage; on overflow the 
+                                        instrumentation aborts rather than 
+                                        truncating (default 10000)
+  --assign-param-nondet                 Explicitly assign every function 
+                                        parameters to NONDET in function mode
+  --cov-report-json                     Output coverage report as JSON file 
+                                        (cov-report.json)
+
+Miscellaneous options:
+  --memlimit limit                      Configure memory limit, of form "100m" 
+                                        or "2g"; without suffix the default 
+                                        unit is 'm'
+  --memstats                            Print memory usage statistics
+  --timeout t                           Configure time limit, integer followed 
+                                        by {s,m,h}
+  --enable-core-dump                    Do not disable core dump output
+  --no-simplify                         Do not simplify any expression
+  --no-propagation                      Disable constant propagation
+  --gcse                                Adds intermediate variables to 
+                                        precompute common sub-expressions 
+                                        between assignments
+  --add-symex-value-sets                Enable value-set analysis for pointers 
+                                        and add assumes to the program
+  --segfault-handler                    Print stacktrace on segmentation fault
+
+DEBUG options:
+  --double-assign-check                 Check for duplicate SSA symbol 
+                                        assignments
+  --no-pointer-relation-check           Do not check whether pointers in order 
+                                        relations refer to the same object 
+                                        (unsound)
+  --abort-on-recursion                  Abort if the program contains recursion
+  --ltl                                 Enable Linear Temporal Logic property 
+                                        checking
+  --break-at arg                        Trigger a breakpoint at the given GOTO 
+                                        instruction number
+  --direct-interleavings                Use directed thread interleavings via 
+                                        intrinsics
+  --show-ileave-points                  Show instructions that access global 
+                                        variables and exit
+  --print-stack-traces                  Print all thread stack traces at each 
+                                        interleaving point
+  --interactive-ileaves                 Interactively choose thread scheduling 
+                                        at interleaving points
+
+IREP2 migration (esbmc/esbmc#4715):
+  --irep2-bodies                        Deprecated no-op (accepted for backward
+                                        compatibility). goto_convert always 
+                                        lowers function bodies through the 
+                                        IREP2 round-trip (migrate legacy codet 
+                                        → code_*2t → codet) since V.4.4; 
+                                        the legacy bypass and the 
+                                        --no-irep2-bodies escape hatch have 
+                                        been removed.
+

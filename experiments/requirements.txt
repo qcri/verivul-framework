@@ -1,0 +1,8 @@
+-r ../requirements.txt
+pandas==3.0.6
+scipy==1.18.1
+scikit-learn==1.9.1
+matplotlib==3.11.2
+python-Levenshtein
+pyarrow==26.0.1
+mlcroissant==1.1.1

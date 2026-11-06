@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- VeriVul: a shield (security) carrying a check (verified) -->
+  <path d="M16 2 4 6v11c0 7 5.2 11.6 12 13 6.8-1.4 12-6 12-13V6z" fill="#2563eb"/>
+  <path d="M10.5 16.4l4 4 7.5-8.4" fill="none" stroke="#fff" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

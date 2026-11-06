@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: If you use VeriVul, please cite the paper.
+title: "VeriVul: A Verification-Guided Framework for Generating Realistic Vulnerability Benchmarks"
+authors:
+  - family-names: Lekssays
+    given-names: Ahmed
+  - family-names: Mouhcine
+    given-names: Hamza
+  - family-names: Khalil
+    given-names: Issa
+license: MIT
+year: 2026

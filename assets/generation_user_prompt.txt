@@ -1,0 +1,221 @@
+Task: Generate a complete, self-contained, compilable program with a single well-hidden vulnerability.
+A structural context extracted from a real vulnerability may be provided below under "Slice Context".
+When present, use it as the primary inspiration for the program's domain, structure, and vulnerability class.
+Reproduce the same vulnerability class in a new program that looks like it belongs to the same software domain,
+but do NOT copy the original code — rewrite it entirely in your own style.
+
+─────────────────────────────────────────────────────────────────────────────
+REAL-WORLD REALISM — the program must have a concrete, believable purpose
+─────────────────────────────────────────────────────────────────────────────
+- Choose a specific, realistic software domain: network packet parsing, binary file format decoding,
+  memory pool / slab allocator, message framing protocol, compression codec, database cursor,
+  event dispatcher, job queue, configuration parser, cryptographic primitive, etc.
+- Every function must serve the program's actual goal. No function exists merely to pad line count.
+- Data structures must match the domain: a packet parser has headers, payloads, sequence numbers;
+  a memory allocator has arenas, free lists, alignment constraints.
+- The program must process structured, realistic inputs (protocol frames, binary records,
+  config entries, encoded buffers) — not trivial hardcoded values or isolated test arrays.
+- The program's logic must be internally consistent and make engineering sense from start to finish.
+
+─────────────────────────────────────────────────────────────────────────────
+DOMAIN AND NAMING
+─────────────────────────────────────────────────────────────────────────────
+- All identifiers must be appropriate for the domain and language conventions
+  (snake_case for C/Python, camelCase for Kotlin, mixedCase for Solidity).
+- Every name must reflect what the entity actually does or holds.
+- Forbidden identifiers — do NOT use anywhere: simulate, example, demo, showcase,
+  illustrate, helper, utility, dummy, placeholder, foo, bar, baz, qux, test_func,
+  sample_data, fake, mock, stub, sample, temp_var, my_func, my_var, some_func.
+
+─────────────────────────────────────────────────────────────────────────────
+SECURITY NEUTRALITY — strictly enforced
+─────────────────────────────────────────────────────────────────────────────
+- No identifier may hint at the security status of the code. Forbidden patterns in
+  ALL names: vulnerable, vuln, insecure, unsafe, exploit, attack, hack, backdoor,
+  inject, pwn, overflow_func, overflow_handler, safe_copy, secure_copy, fixed_copy, patched.
+- No comment, annotation, or string literal may mention or suggest a vulnerability,
+  bug, security issue, or memory error — not even indirectly.
+- The code must read as ordinary implementation code. A code reviewer must see
+  nothing unusual beyond a possible logic error.
+
+─────────────────────────────────────────────────────────────────────────────
+VULNERABILITY STEALTH — this is the hardest and most important requirement
+─────────────────────────────────────────────────────────────────────────────
+The vulnerability must be undetectable by:
+  • Scanning for unsafe function names or obvious anti-patterns
+  • Inspecting any single function in isolation
+  • Simple pattern-matching or grep-style analysis
+
+It must only be found by:
+  • Tracing how a value flows and transforms across multiple functions
+  • Understanding the relationship between a constraint established in one place
+    and an operation performed in a completely different place
+  • Recognising a subtle arithmetic or type property that breaks only under
+    specific non-trivial inputs
+
+Nesting depth is always preferred and strongly encouraged: route data through
+the deepest call chain that remains realistic. A value that passes through 4–5
+functions before reaching the dangerous operation is far harder to trace than
+one that crosses only 2. Build the call graph first, then place the origin and
+the harm as far apart as possible.
+
+Mandatory stealth techniques — use at least TWO of the following:
+
+  1. Cross-function distance (preferred, always encouraged): the place where a
+     dangerous value originates (e.g., an unchecked length read from a frame
+     header) and the place where it causes harm (e.g., a malloc + memcpy) must
+     be separated by at least two function calls and several lines of legitimate
+     intervening code. Deeper call chains (3–5 levels) are strongly preferred —
+     the more nested and indirect the data flow, the harder the vulnerability is
+     to detect. Every intermediate function should have a plausible, standalone
+     purpose so that no single frame in the call stack reveals the danger.
+
+  2. Type narrowing / truncation: a value is computed in a wide type (e.g., size_t,
+     uint32_t, int64_t), passed through a narrower type (e.g., uint16_t, int,
+     uint8_t) at a struct boundary or function parameter, and the truncated value
+     is used for an allocation or index. The truncation looks like an innocuous
+     type match.
+
+  3. Integer arithmetic that overflows only on specific inputs: a length or size
+     is calculated through a multi-step formula (e.g., `(count + 1) * element_size`
+     or `base_offset + header_len + payload_len`). Overflow only occurs when values
+     are near their type limits — not for typical inputs.
+
+  4. Signed / unsigned confusion: a value is checked as signed (allowing negative
+     to pass a `>= 0` guard) but used as unsigned (or cast to size_t) in an
+     allocation or array index, causing a huge allocation or out-of-bounds access.
+
+  5. Off-by-one buried in loop logic: the loop bound or index arithmetic is off by
+     one in a way that looks like a deliberate design choice. The surrounding loop
+     body does something meaningful so the error is not immediately obvious.
+
+  6. Error-path use-after-free or double-free: a cleanup / error-handling path frees
+     a resource that was already freed or will be freed again by a parent scope.
+     The two free sites are in different functions and both look like correct cleanup.
+
+  7. Stale pointer via realloc or container resize: a pointer into a buffer is saved
+     before a realloc/resize operation; after the realloc, the old pointer is still
+     used. The realloc is in a helper function that looks like it returns a fresh
+     handle, hiding that it invalidated the caller's pointer.
+
+  8. Conditional vulnerability — wrong triggering condition: the code correctly
+     handles the common case and is visibly safe in the most-likely execution path.
+     The bug only triggers under a specific, non-trivial condition (e.g., a flag
+     combination, a particular message type, a size at the type boundary).
+
+Camouflage requirements:
+  - Surround the vulnerable operation with 2–4 similar-looking but safe operations
+    of the same kind (e.g., if the bug is a wrong size in one memcpy, the other
+    memcpys nearby must use correct sizes).
+  - If the bug involves a calculation, other calculations in the same function must
+    look structurally identical to prevent the wrong one from standing out.
+  - The vulnerable function must have a clear, complete, and correct-seeming purpose.
+    Its docstring (if any language requires one) must describe real functionality.
+
+─────────────────────────────────────────────────────────────────────────────
+VULNERABILITY SELECTION
+─────────────────────────────────────────────────────────────────────────────
+Reproduce the CWE of the seed, given as "CWE Category" in the Context. If several are
+listed, pick one of them; if the seed's CWE is a category (CWE-20, CWE-399, CWE-264, ...)
+or cannot be expressed as a memory-safety or arithmetic defect, pick the closest one of:
+  - C / C++ / CUDA: CWE-190 (integer overflow), CWE-125 (out-of-bounds read),
+    CWE-120 (buffer copy without size check), CWE-415 (double-free),
+    CWE-119 (improper memory bounds), CWE-787 (out-of-bounds write),
+    CWE-476 (null pointer dereference), CWE-416 (use-after-free), CWE-590 (free of non-heap),
+    CWE-401 (memory leak)
+  - Solidity: CWE-190 (overflow/underflow in `unchecked` block),
+    CWE-841 (missing state guard allowing re-execution),
+    CWE-284 (missing modifier / require access control check)
+  - Python: CWE-190, CWE-476 (NoneType dereference), CWE-125 (list index out of range)
+
+Only one vulnerability. It must be actually triggerable in logic, not merely theoretical.
+
+─────────────────────────────────────────────────────────────────────────────
+DIVERSITY — every program must be its own component
+─────────────────────────────────────────────────────────────────────────────
+- Invent the component from the seed's domain, not from a template. Vary the data
+  layout (packed headers, tagged unions, linked records, ring buffers, tables, trees),
+  the control-flow style (state machine, dispatch table, recursive descent, streaming
+  loop), the error-handling convention (return codes, goto cleanup, early return) and
+  the naming scheme between programs.
+- Do not reuse stock scaffolding seen in generated code: a `validate_header` that checks
+  `magic != 0x4142`, `MAX_FRAME_SIZE`/`MAX_RECORDS` style limits with the same names,
+  `process_compressed`, `parse_record_block`, `frame_header`/`pdu_header_t` layouts,
+  or a main that maps a region, prints "Region unmapped" and runs two cycles. Choose
+  constants, limits, field names and function names specific to the invented component.
+- The vulnerability must not be one that grep finds: no gets, no strcpy/strcat/sprintf of
+  raw input into a fixed buffer, no scanf("%s") without a width, no hard-coded oversize
+  index, no free followed by an obvious reuse in the same function.
+
+─────────────────────────────────────────────────────────────────────────────
+CORE REQUIREMENTS
+─────────────────────────────────────────────────────────────────────────────
+- Completeness: A single block of code, compilable and runnable without modification.
+- Standard libraries only. No external dependencies unless unavoidable for the domain.
+- Input: stdin only (fgets, fread, getchar, scanf with field widths), treated as untrusted
+  data from the outside world. Do not open files for reading, do not read a file name and
+  open it, and do not call getenv: a binary format is read from stdin directly. For
+  Solidity: constructor arguments or public function parameters. No isolated hardcoded
+  test arrays.
+- Do NOT read from argc or argv and do not declare main with parameters.
+- Bounded input and bounded loops: read a fixed-size buffer or a fixed maximum number
+  of records; every loop must have a bound that is a constant or derived from an
+  already-bounded length. Never loop `while (fgets(...))` / `while (read(...))` / until
+  EOF without a counter. The program must terminate on every input.
+- Initialise every variable, struct and buffer before it is read.
+- The defect must be reproducible on a real machine: some bytes on stdin must make an
+  AddressSanitizer or UndefinedBehaviorSanitizer build of the program fail (out-of-bounds
+  access, use-after-free, double free, invalid free, null dereference, signed overflow,
+  division by zero, or a lost allocation). The trigger must come from that input and the
+  program's own logic, never from the result of a system or time call (stat, open, time,
+  localtime, getpid, rand), a failed allocation, or a library function returning an
+  unusual value. The same program must run cleanly under those sanitizers for ordinary
+  inputs; the failure appears only for the particular input class that reaches the defect.
+- Keep the program deterministic: the same input must always take the same path.
+- No verifier or test intrinsics (__ESBMC_*, __VERIFIER_*, __CPROVER_*, assert as a
+  trap), no threads or fork (pthread, C11 threads, OpenMP), no signals, no inline
+  assembly, no setjmp/longjmp.
+- Standard library and headers must stay inside what the verifier's front end can read; a
+  program that compiles but uses anything else is rejected and wasted:
+    C / C++  → write C-style code. Include the C headers (<stdint.h>, <string.h>, <stdlib.h>,
+               <stdio.h>) and call C library functions unqualified (strlen, memcpy, memset),
+               never std::strlen / std::memcpy and never <cstring>, <cstdint>, <cstdlib>.
+               No STL containers, std::string, streams, smart pointers or lambdas: use fixed
+               arrays, structs, raw pointers and malloc/free. Declare every type you use. Do not
+               define types the system headers already declare (struct iovec, timeval, sockaddr,
+               stat, ...); the verifier's headers declare them and a second definition is rejected.
+    Python   → import only from: collections, dataclasses, datetime, decimal, enum, heapq,
+               math, os, queue, random, re, string, time, typing. Any other module (sys, json,
+               struct, ctypes, hashlib, base64, logging, io, itertools, functools, copy, abc,
+               argparse, pathlib, subprocess, socket, ...) is rejected. Read input with input().
+               Also unsupported: bytearray (use bytes or a list of ints), open() and file I/O,
+               numpy, and arithmetic on whole lists.
+- Include between 8 and 15 interconnected functions that reflect realistic program structure.
+- Entry point per language:
+    C / C++ / CUDA  → int main(void); no argc/argv parameters
+    Kotlin          → top-level fun main(); no package declaration
+    Python          → if __name__ == "__main__": block; PEP 484 type annotations on all signatures
+    Solidity        → public contract functions; no main()
+- Honor the Program Length in the Target Metrics section if provided (target: close to
+  the specified non-empty line count). Default: 200–500 non-empty lines.
+- No stubs. Every function is fully implemented.
+- No comments of any kind. Zero.
+- No debugging output unrelated to the program's purpose.
+- Standard types only: replace u32→uint32_t, BOOL→int, DWORD→unsigned long, etc.
+
+─────────────────────────────────────────────────────────────────────────────
+OUTPUT FORMAT
+─────────────────────────────────────────────────────────────────────────────
+- Enclose the complete source code in <snippet> tags.
+- Enclose any required dependency installation command in <install_command> tags
+  (or echo 'No dependencies required'). Do NOT include the compilation command.
+  Assume gcc, g++, python3, kotlinc, nvcc, solc, and build-essential are available.
+- Nothing outside these two tag pairs.
+
+<snippet>
+[YOUR_FULL_COMPILABLE_PROGRAM_HERE]
+</snippet>
+
+<install_command>
+[ONE_LINER_INSTALL_COMMAND_OR_echo 'No dependencies required']
+</install_command>

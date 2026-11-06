@@ -1,0 +1,27 @@
+Task: The provided code is failing to compile. Please fix the compilation errors to make the code compile successfully. Apply only the necessary changes to resolve the compilation issues, preserving the original intended functionality and style as much as possible.
+
+Requirements:
+- Fix Compilation Errors: Identify and correct the syntax errors, type mismatches, missing includes/imports, undefined symbols, or other issues preventing the CODE_WITH_ERRORS from compiling.
+- Minimal Changes: Apply only the modifications strictly necessary to achieve successful compilation.
+- Preserve Functionality: Maintain the original intended logic and behavior of the code as closely as possible.
+- Maintain Style: Preserve the original code's formatting and naming conventions unless changes are required for a compilation fix.
+- Complete Code: Provide the entire corrected program, not just the modified lines or functions.
+- Do not introduce argc/argv, verifier intrinsics, threads, or comments; keep `int main(void)`. C / C++: read input from stdin only (no files opened for reading, no getenv).
+- If the log says the ESBMC front end rejected the program, it compiles with the normal compiler but uses something the verifier cannot read. C / C++: use C headers (<stdint.h>, <string.h>) and unqualified C library calls instead of std::strlen / <cstring>, and replace STL containers and std::string with arrays, structs and raw pointers; if a redefinition error names a system type (struct iovec, timeval, ...), delete your own definition or rename it. Python: no bytearray (use bytes or a list of ints), no open() or file I/O, no numpy; remove imports outside collections, dataclasses, datetime, decimal, enum, heapq, math, os, queue, random, re, string, time, typing (no sys, json, struct, ctypes, hashlib, ...).
+- Installation Command: Check the previous installation command (not run command) if it is correct, if not provide a new installation command.
+
+Output Requirements:
+- Provide only the complete, fixed, compilable program source code.
+- Enclose the entire code block within <snippet> tags.
+- Enclose the ONE liner command in <install_command> tags.
+- Ensure absolutely no explanations, introductions, or any other text appear outside the <snippet> or <install_command> tags.
+- Enclose the ONE liner command in <install_command> tags. Do not include compilation command. Include only correct and verified dependencies. The code will run on a docker container with Ubuntu 24.04. Assume that gcc, g++, kotlinc, python3, build-essential are installed. The environment is a docker container based on Ubuntu 24.04 LTS. Installations shall not have sudo since the container will run as root.
+- Ensure there is an install command as it is mandatory
+
+<snippet>
+[YOUR_FULL_COMPILABLE_AND_FIXED_PROGRAM_HERE]
+</snippet>
+
+<install_command>
+[ONE_LINER_INSTALL_COMMAND]
+</install_command>
