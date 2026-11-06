@@ -23,4 +23,4 @@ python experiments/benchmark/build_eval_sets.py --release ../data/verivul.jsonl 
 python dataset/build_croissant.py --root ..
 ```
 
-The pipeline databases are not part of the artifact.
+The pipeline databases are not released.

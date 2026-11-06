@@ -6,6 +6,15 @@ Generates vulnerability benchmarks whose labels are checked by a bounded model c
 seed file -> LLM generation -> compile -> ESBMC -> sanitizer reproduction -> export
 ```
 
+## Dataset
+
+The VeriVul dataset has its own releases. It holds the verified programs, the ESBMC logs, the subsets and the evaluation sets used in the paper.
+
+* Zenodo: https://doi.org/10.5281/zenodo.0000000
+* Hugging Face: https://huggingface.co/datasets/qcri/verivul-dataset
+
+This repository holds the code that produces and evaluates it.
+
 ## Layout
 
 | Path | Contents |
@@ -48,7 +57,7 @@ python scripts/export_verified.py --output verified_samples.jsonl
 python scripts/export_pairs.py --output pairs.jsonl
 ```
 
-`dataset/build_release.py` turns these exports into the released files.
+`dataset/build_release.py` turns these exports into the files of the dataset release.
 
 ## Tests
 
