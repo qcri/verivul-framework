@@ -118,7 +118,7 @@ print(log["id"], log["esbmc_log"][-200:])
 
 ## More material
 
-The Zenodo record has the framework, the scripts that recompute the paper's numbers and the same data: https://doi.org/10.5281/zenodo.24017330. The framework repository is https://github.com/qcri/verivul-framework.
+The Zenodo record has the framework, the scripts that recompute the paper's numbers and the same data: https://doi.org/10.5281/zenodo.24018992. The framework repository is https://github.com/qcri/verivul-framework.
 
 ## License and citation
 
@@ -130,6 +130,6 @@ Data under CC BY 4.0. Seeds derive from ReposVul and ICVul, both MIT. The compar
   author    = {Lekssays, Ahmed and Mouhcine, Hamza and Khalil, Issa},
   booktitle = {Advances in Neural Information Processing Systems, Evaluations and Datasets Track},
   year      = {2026},
-  note      = {Dataset DOI: 10.5281/zenodo.24017330, code: https://github.com/qcri/verivul-framework}
+  note      = {Dataset DOI: 10.5281/zenodo.24018992, code: https://github.com/qcri/verivul-framework}
 }
 ```

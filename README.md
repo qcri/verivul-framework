@@ -10,7 +10,7 @@ seed file -> LLM generation -> compile -> ESBMC -> sanitizer reproduction -> exp
 
 The VeriVul dataset has its own releases. It holds the verified programs, the ESBMC logs, the subsets and the evaluation sets used in the paper.
 
-* Zenodo: https://doi.org/10.5281/zenodo.24017330
+* Zenodo: https://doi.org/10.5281/zenodo.24018992
 * Hugging Face: https://huggingface.co/datasets/qcri/verivul-dataset
 
 This repository holds the code that produces and evaluates it.

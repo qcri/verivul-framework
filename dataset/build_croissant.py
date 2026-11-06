@@ -130,7 +130,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", required=True)
     ap.add_argument("--base-url", default="")
-    ap.add_argument("--url", default="https://doi.org/10.5281/zenodo.24017330")
+    ap.add_argument("--url", default="https://doi.org/10.5281/zenodo.24018992")
     ap.add_argument("--bundle", action="store_true", help="describe the upload bundle, where small files are packed in data/extras.tar.gz")
     ap.add_argument("--hf", action="store_true", help="describe the Hugging Face mirror (no logs or archives)")
     ap.add_argument("--out", default=None)
