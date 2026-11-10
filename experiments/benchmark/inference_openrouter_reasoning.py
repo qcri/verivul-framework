@@ -47,7 +47,7 @@ load_dotenv()
 # Paths
 # ---------------------------------------------------------------------------
 ROOT        = Path(__file__).parent
-SAMPLES_DIR = ROOT / "datasets" / "Samples"
+SAMPLES_DIR = Path(os.environ.get("VERIVUL_SAMPLES", ROOT / "samples"))
 RESULTS_DIR = ROOT / "results"
 PROMPTS_DIR = ROOT / "prompts"
 

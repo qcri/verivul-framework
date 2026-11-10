@@ -8,7 +8,7 @@ seed file -> LLM generation -> compile -> ESBMC -> sanitizer reproduction -> exp
 
 ## Dataset
 
-The VeriVul dataset has its own releases. It holds the verified programs, the ESBMC logs, the subsets and the evaluation sets used in the paper.
+The VeriVul dataset is released separately and is not part of this repository. It holds the verified programs, the ESBMC logs, the subsets and the evaluation sets used in the paper.
 
 * Zenodo: https://doi.org/10.5281/zenodo.24021165
 * Hugging Face: https://huggingface.co/datasets/qcri/verivul-dataset
@@ -26,7 +26,6 @@ This repository holds the code that produces and evaluates it.
 | `scripts/` | resume, requeue, export, confirm, maintenance |
 | `tests/` | unit tests and ESBMC probe programs |
 | `experiments/` | realism, contamination and benchmark code |
-| `dataset/` | builds the released dataset files |
 | `docs/` | pipeline, labels, seeds, experiments |
 
 ## Setup
@@ -57,7 +56,7 @@ python scripts/export_verified.py --output verified_samples.jsonl
 python scripts/export_pairs.py --output pairs.jsonl
 ```
 
-`dataset/build_release.py` turns these exports into the files of the dataset release.
+Each record holds the program, the ESBMC verdict and log, and the sanitizer result.
 
 ## Tests
 

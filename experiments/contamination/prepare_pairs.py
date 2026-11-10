@@ -1,7 +1,7 @@
 """Builds data/reposvul_sliced.jsonl (seed functions) and data/verified_samples.jsonl
 (one release program per seed) for contamination_probe.py.
 
-    python prepare_pairs.py --release ../../../data/verivul.jsonl --seeds seeds.jsonl
+    python prepare_pairs.py --release verivul.jsonl --seeds seeds.jsonl
 """
 import argparse
 import collections

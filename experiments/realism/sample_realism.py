@@ -10,10 +10,10 @@ Each output file contains up to N vulnerable function-level records:
 Sampling targets N=6000 per dataset; for ARVO we take all vulnerable entries
 (2917 — there are no more).
 
-VeriVul samples are 5,000 vulnerable programs of the released dataset (data/verivul.jsonl), drawn with
-the expansion-model mix of the original snapshot (gemma-4-31b-it 44.8%, seed-coder-8b 24.5%,
+VeriVul samples are 5,000 vulnerable programs of the released dataset (verivul.jsonl), drawn with
+the expansion-model mix used in the paper (gemma-4-31b-it 44.8%, seed-coder-8b 24.5%,
 gpt-oss-120b 23.0%, qwen3.6-35b-a3b 7.7%). The ids of the sample used in the paper are in
-data/realism/matched_sample.json and are used when present. The external datasets are read from
+matched_sample.json in the sample directory and are used when present. The external datasets are read from
 $EXTERNAL_DATASETS (default experiments/realism/data/external).
 
 Run:
@@ -45,8 +45,8 @@ C_EXTS = {'c', 'cc', 'cpp', 'cxx', 'h', 'hpp', 'C'}
 ROOT = Path(__file__).parent
 EXT = os.environ.get('EXTERNAL_DATASETS', str(ROOT / 'data' / 'external'))
 OUT_DIR = Path(os.environ.get('REALISM_DIR', ROOT / 'data' / 'realism_samples'))
-RELEASE = Path(os.environ.get('VERIVUL_RELEASE', ROOT / '..' / '..' / '..' / 'data' / 'verivul.jsonl'))
-MATCHED = RELEASE.parent / 'realism' / 'matched_sample.json'
+RELEASE = Path(os.environ.get('VERIVUL_RELEASE', 'verivul.jsonl'))
+MATCHED = OUT_DIR / 'matched_sample.json'
 SHARE = {'gemma-4-31b-it': .448, 'seed-coder-8b': .245, 'gpt-oss-120b': .230, 'qwen3.6-35b-a3b': .077}
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

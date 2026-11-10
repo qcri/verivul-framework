@@ -1,6 +1,6 @@
 """Builds the VeriVul evaluation sets from the released dataset.
 
-    python build_eval_sets.py --release ../../../data/verivul.jsonl --out ../../../data/evaluation
+    python build_eval_sets.py --release verivul.jsonl --out evaluation
 
 seed_matched_400.jsonl: 50 vulnerable/safe pairs for each of eight CWEs (CWE-20, 119, 120, 125, 190, 401, 416, 476).
 A pair is a vulnerable and a safe program that derive from the same seed; the CWE is the first target CWE of the
