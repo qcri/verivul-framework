@@ -20,5 +20,4 @@ Install with `pip install -r experiments/requirements.txt`. Each directory has i
 | `realism/cluster_analysis.py` | the embeddings | cluster metrics, PCA and t-SNE figures |
 | `realism/sensitivity.py` | embeddings of all vulnerable programs and of the corpora | per-generator wins over FormAI |
 | `contamination/prepare_pairs.py`, `contamination_probe.py` | `verivul.jsonl`, seed functions, an OpenAI-compatible endpoint | per-pair similarity scores |
-| `benchmark/build_eval_sets.py` | `verivul.jsonl` | evaluation sets |
 | `benchmark/inference.py`, `evaluate*.py` | evaluation sets, model API keys | predictions, reports |

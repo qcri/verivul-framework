@@ -4,7 +4,6 @@ Each model sees the vulnerable and the safe program of a pair as two separate qu
 
 | Path | Purpose |
 |---|---|
-| `build_eval_sets.py` | builds the VeriVul evaluation sets from `verivul.jsonl` |
 | `inference.py` | OpenRouter chat completions (`OPENROUTER_API_KEY`) |
 | `inference_openrouter_reasoning.py` | OpenRouter with reasoning enabled |
 | `inference_deepseek.py` | DeepSeek API (`DEEPSEEK_API_KEY`) |
@@ -15,12 +14,11 @@ Each model sees the vulnerable and the safe program of a pair as two separate qu
 
 ## Evaluation sets
 
-`build_eval_sets.py` builds three files from `verivul.jsonl`. `seed_matched_400.jsonl` has 50 vulnerable and safe pairs from the same seed for each of CWE-20, 119, 120, 125, 190, 401, 416 and 476. `verified_pairs_98.jsonl` has all verified parent and child pairs. `trigger_ground_truth.jsonl` has the ESBMC trigger lines. Programs flagged for a sanitizer counterexample on a SAFE label or for an empty `main` are excluded. The sets are also part of the dataset release.
+The two VeriVul evaluation sets come with the dataset. `seed_matched_400.jsonl` has 50 vulnerable and safe pairs from the same seed for each of CWE-20, 119, 120, 125, 190, 401, 416 and 476. `verified_pairs_98.jsonl` has all verified parent and child pairs.
 
 ## Commands
 
 ```bash
-python build_eval_sets.py --release verivul.jsonl --out evaluation
 python inference.py --model openai/gpt-5.4 --dataset VeriVul --workers 16 --max-tokens 4096 --resume --output <file>
 python inference.py --model deepseek/deepseek-v4-pro --no-thinking ...
 python inference.py --model openai/gpt-oss-120b ...
@@ -28,7 +26,7 @@ python inference.py --model anthropic/claude-opus-4.7 ...
 python evaluate.py && python evaluate_trigger.py
 ```
 
-The inference scripts read `<Dataset>_samples.json` files from `$VERIVUL_SAMPLES` (default `samples/`). Each file is a list of pairs with `vulnerable_code`, `patched_code` and `primary_cwe`. To convert an evaluation set, rename `safe_code` to `patched_code` and `cwe` to `primary_cwe`. All inference scripts accept `--dataset`, `--all`, `--test`, `--workers`, `--max-samples`, `--output` and `--resume`.
+The inference scripts read `<Dataset>_samples.json` files from `$VERIVUL_SAMPLES` (default `samples/`). Each file is a list of pairs with `vulnerable_code`, `patched_code` and `primary_cwe`. To convert an evaluation set from the dataset, rename `safe_code` to `patched_code` and `cwe` to `primary_cwe`. All inference scripts accept `--dataset`, `--all`, `--test`, `--workers`, `--max-samples`, `--output` and `--resume`.
 
 ## Comparison corpora
 
